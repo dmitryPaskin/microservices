@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  auth:
+    restart: on-failure
+    container_name: ${APP_NAME}
+    build: .
+    env_file:
+      - .env
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    external: true          

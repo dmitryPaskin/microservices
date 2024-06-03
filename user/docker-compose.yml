@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  auth:
+    restart: on-failure
+    container_name: ${APP_NAME}
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      - db_users
+    networks:
+      - my_network
+
+  db_users:
+    image: postgres
+    restart: on-failure
+    container_name: db_users
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5433:5432"  
+    networks:
+      - my_network 
+  
+  migrator_users:
+    image: migrate/migrate
+    volumes:
+    - ./migrations:/migrations
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable",
+      ]    
+    command: ["up"]    
+    depends_on:
+        - db_users
+    restart: on-failure
+    networks:
+    - my_network       
+
+networks:
+  my_network:
+    external: true          

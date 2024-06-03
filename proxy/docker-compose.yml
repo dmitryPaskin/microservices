@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  proxy:
+    restart: on-failure
+    container_name: ${APP_NAME}
+    build: .
+    volumes:
+    - "../hugo/content:/app/static"
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - .env
+    networks:
+      - my_network
+
+  hugo:
+    image: klakegg/hugo:0.101.0-ext-alpine
+    container_name: hugo
+    command: server --bind "0.0.0.0"    
+    volumes:
+      - "../hugo:/src"
+    ports:
+     - "1313:1313"  
+    networks:
+      - my_network 
+  
+networks:
+  my_network:
+    external: true            
